@@ -11,19 +11,22 @@ def getWeather():
 
 	time = d.now()
 	now_h = str()
-	if (time.hour >= 0 and time.hour < 2) or (time.hour < 24 and time.hour) >= 23: now_h = "2300"
-	elif time.hour >= 2 and time.hour < 5: now_h = "0200"
-	elif time.hour >= 5 and time.hour < 8: now_h = "0500"
-	elif time.hour >= 8 and time.hour < 11: now_h = "0800"
-	elif time.hour >= 11 and time.hour < 14: now_h = "1100"
-	elif time.hour >= 14 and time.hour < 17: now_h = "1400"
-	elif time.hour >= 17 and time.hour < 20: now_h = "1700"
-	elif time.hour >= 20 and time.hour < 23: now_h = "2000"
+	if (time.hour > 0 and time.hour <= 2) or (time.hour <= 24 and time.hour > 23): now_h = "2300"
+	elif time.hour > 2 and time.hour <= 5: now_h = "0200"
+	elif time.hour > 5 and time.hour <= 8: now_h = "0500"
+	elif time.hour > 8 and time.hour <= 11: now_h = "0800"
+	elif time.hour > 11 and time.hour <= 14: now_h = "1100"
+	elif time.hour > 14 and time.hour <= 17: now_h = "1400"
+	elif time.hour > 17 and time.hour <= 20: now_h = "1700"
+	elif time.hour > 20 and time.hour <= 23: now_h = "2000"
 
+	realtime = str(time.hour) + "00"
+	retV.append(realtime)
+	
 	now_d = str(time.date())
 	now_d = ''.join([x for x in list(now_d) if x != '-'])
 
-	#print(now_h)
+	# print(now_h)
 	#print(now_d)
 
 	url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'
@@ -49,6 +52,7 @@ def getWeather():
 					result_num = re.sub(r'[^0-9]', '', findall_result[0])
 					# print("time: ", findall_time)
 					#print(findall_time, "강수확률(POP):", result_num, "%")
+					#if str(findall_time) == realtime: buf.append(str(findall_time) + " 강수확률(POP): " + str(result_num) + "%")
 					buf.append(str(findall_time) + " 강수확률(POP): " + str(result_num) + "%")
 			retV.append(buf)
 		cnt += 1
@@ -68,6 +72,7 @@ def getWeather():
 					result_num = re.sub(r'[^0-9]', '', findall_result[0])
 					# print("time: ", findall_time)
 					#print(findall_time, "강수형태(PTY):", my_PTY[int(result_num)])
+					# if str(findall_time) == realtime: buf.append(str(findall_time) + " 강수형태(PTY): " + my_PTY[int(result_num)])
 					buf.append(str(findall_time) + " 강수형태(PTY): " + my_PTY[int(result_num)])
 			retV.append(buf)
 		cnt += 1
@@ -87,6 +92,7 @@ def getWeather():
 					result_num = re.sub(r'[^0-9]', '', findall_result[0])
 					# print("time: ", findall_time)
 					#print(findall_time, "하늘상태(SKY):", my_SKY[int(result_num)])
+					#if str(findall_time) == realtime: buf.append(str(findall_time) + " 하늘상태(SKY): " + my_SKY[int(result_num)])
 					buf.append(str(findall_time) + " 하늘상태(SKY): " + my_SKY[int(result_num)])
 			retV.append(buf)
 		cnt += 1
@@ -95,5 +101,10 @@ def getWeather():
 
 
 a = getWeather()
-for i in a:
-	print(i)
+
+now_time = a[0]
+for i in a[1:]:
+	for x in i:
+		time = list(x)
+		time = ''.join(time[x] for x in range(4))
+		if time == now_time: print(x)
