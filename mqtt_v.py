@@ -6,8 +6,12 @@ def getWeather():
 
 	retV = []
 
-	my_PTY = ["없음", "비", "비/눈", "눈", "소나기"]
-	my_SKY = {1 : "맑음", 3 : "구름많음", 4 : "흐림"}
+	find_V = ["POP", "PTY", "SKY"]
+	append_V = [" 강수확률(POP): ", " 강수형태(PTY): ", " 하늘상태(SKY): "]
+	last_V = ["%", "", ""]
+
+	my_PTY = {"0":"없음", "1":"비", "2":"비/눈", "3":"눈", "4":"소나기"}
+	my_SKY = {"1" : "맑음", "3" : "구름많음", "4" : "흐림"}
 
 	time = d.now()
 	now_h = str()
@@ -41,70 +45,36 @@ def getWeather():
 	# 강수 확률 추출
 	#print("강수 확률")
 	for x in list(response_str.split('<items>')):
-		if cnt == 1: 
-			buf = []
+		if cnt >= 1: 
+			
 			for y in x.split("</item>"):
-
-				if len(re.findall("POP", y)) != 0:
-					
-					findall_result = re.findall(r'<fcstValue>[0-9]{2}</fcstValue>', y) + re.findall(r'<fcstValue>[0-9]{3}</fcstValue>', y) + re.findall(r'<fcstValue>[0-9]{1}</fcstValue>', y)
-					findall_time = re.sub(r'[^0-9]', '', (re.findall(r'<fcstTime>[0-9]{4}</fcstTime>', y))[0])
-					result_num = re.sub(r'[^0-9]', '', findall_result[0])
-					# print("time: ", findall_time)
-					#print(findall_time, "강수확률(POP):", result_num, "%")
-					#if str(findall_time) == realtime: buf.append(str(findall_time) + " 강수확률(POP): " + str(result_num) + "%")
-					buf.append(str(findall_time) + " 강수확률(POP): " + str(result_num) + "%")
-			retV.append(buf)
-		cnt += 1
-
-	cnt = 0
-	# 강수 형태 추출
-	#print("강수 형태")
-	for x in list(response_str.split('<items>')):
-		if cnt == 1: 
-			buf = []
-			for y in x.split("</item>"):
-
-				if len(re.findall("PTY", y)) != 0:
-					
-					findall_result = re.findall(r'<fcstValue>[0-9]{1}</fcstValue>', y)
-					findall_time = re.sub(r'[^0-9]', '', (re.findall(r'<fcstTime>[0-9]{4}</fcstTime>', y))[0])
-					result_num = re.sub(r'[^0-9]', '', findall_result[0])
-					# print("time: ", findall_time)
-					#print(findall_time, "강수형태(PTY):", my_PTY[int(result_num)])
-					# if str(findall_time) == realtime: buf.append(str(findall_time) + " 강수형태(PTY): " + my_PTY[int(result_num)])
-					buf.append(str(findall_time) + " 강수형태(PTY): " + my_PTY[int(result_num)])
-			retV.append(buf)
-		cnt += 1
-
-	cnt = 0
-	# 하늘 상태 추출
-	#print("하늘 상태")
-	for x in list(response_str.split('<items>')):
-		if cnt == 1: 
-			buf = []
-			for y in x.split("</item>"):
-
-				if len(re.findall("SKY", y)) != 0:
-					
-					findall_result = re.findall(r'<fcstValue>[0-9]{1}</fcstValue>', y)
-					findall_time = re.sub(r'[^0-9]', '', (re.findall(r'<fcstTime>[0-9]{4}</fcstTime>', y))[0])
-					result_num = re.sub(r'[^0-9]', '', findall_result[0])
-					# print("time: ", findall_time)
-					#print(findall_time, "하늘상태(SKY):", my_SKY[int(result_num)])
-					#if str(findall_time) == realtime: buf.append(str(findall_time) + " 하늘상태(SKY): " + my_SKY[int(result_num)])
-					buf.append(str(findall_time) + " 하늘상태(SKY): " + my_SKY[int(result_num)])
-			retV.append(buf)
+				# print(y)
+				for i in range(3):
+					buf = []
+					if len(re.findall(find_V[i], y)) != 0:
+						findall_result = re.findall(r'<fcstValue>[0-9]{2}</fcstValue>', y) + re.findall(r'<fcstValue>[0-9]{3}</fcstValue>', y) + re.findall(r'<fcstValue>[0-9]{1}</fcstValue>', y)
+						findall_time = re.sub(r'[^0-9]', '', (re.findall(r'<fcstTime>[0-9]{4}</fcstTime>', y))[0])
+						result_num = re.sub(r'[^0-9]', '', findall_result[0])
+						# print("time: ", findall_time)
+						#print(findall_time, "강수확률(POP):", result_num, "%")
+						#if str(findall_time) == realtime: buf.append(str(findall_time) + " 강수확률(POP): " + str(result_num) + "%")
+						if find_V[i] == "PTY": val = my_PTY[result_num]
+						elif find_V[i] == "SKY": val = my_SKY[result_num]
+						else: val = str(result_num)
+						buf.append(str(findall_time) + append_V[i] + val + last_V[i])
+						retV.append(buf)
 		cnt += 1
 	
 	return retV
 
 
 a = getWeather()
-
-now_time = a[0]
-for i in a[1:]:
-	for x in i:
-		time = list(x)
-		time = ''.join(time[x] for x in range(4))
-		if time == now_time: print(x)
+for i in a:
+	print(i)
+# print(a)
+# now_time = a[0]
+# for i in a[1:]:
+# 	for x in i:
+# 		time = list(x)
+# 		time = ''.join(time[x] for x in range(4))
+# 		if time == now_time: print(x)
