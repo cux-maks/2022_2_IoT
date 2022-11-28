@@ -174,6 +174,7 @@ def on_publish(client, userdata, mid):
 def on_message(client, userdata, msg):
 	print("Topic:", msg.topic, " Message:", str(msg.payload))
 	if msg.topic == "PIR" and str(msg.payload) == "detected":
+		print("PIR detected msg get")
 		if readChannel(fsr_channel) >= 10:
 			mqttc.publish(mqtt_sub[0], "GPS")
 	else:
