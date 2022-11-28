@@ -175,10 +175,10 @@ def on_publish(client, userdata, mid):
 def on_message(client, userdata, msg):
 	print("Topic:", msg.topic, " Message:", str(msg.payload))
 	if msg.topic == "PIR" and str(msg.payload) == "detected":
-		if True: # 압력센서 값 입력시
+		if readChannel(fsr_channel) >= 10:
 			mqttc.publish(mqtt_sub[0], "GPS")
 	else:
-		if True: # 압력센서 값 입력시
+		if readChannel(fsr_channel) >= 10:
 			if dht() >= hum_val:
 				gpio.output(r_led, True)
 			else:
