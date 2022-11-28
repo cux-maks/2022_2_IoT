@@ -6,8 +6,15 @@ import dht11
 import math
 # import time
 
+r_led = 5
+y_led = 6
+g_led =13
+
 gpio.setwarnings(False)
 gpio.setmode(gpio.BCM)
+gpio.setup(r_led, gpio.OUT)
+gpio.setup(y_led, gpio.OUT)
+gpio.setup(g_led, gpio.OUT)
 gpio.cleanup()
 
 instance = dht11.DHT11(pin = 19)
