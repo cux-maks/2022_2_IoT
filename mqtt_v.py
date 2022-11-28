@@ -173,15 +173,18 @@ def on_publish(client, userdata, mid):
 	
 def on_message(client, userdata, msg):
 	print("Topic:", msg.topic, " Message:", str(msg.payload))
-	if msg.topic == "PIR" and str(msg.payload) == "detected":
+	if msg.topic == "PIR" and str(msg.payload) == b'detected':
 		print("PIR detected msg get")
 		if readChannel(fsr_channel) >= 10:
+			print("pub_gps")
 			mqttc.publish(mqtt_sub[0], "GPS")
 	else:
 		if readChannel(fsr_channel) >= 10:
 			if dht() >= hum_val:
+				print("on")
 				gpio.output(r_led, True)
 			else:
+				print("off")
 				gpio.output(r_led, False)
 				
 def readChannel(channel):
