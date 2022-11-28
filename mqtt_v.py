@@ -179,6 +179,7 @@ def on_message(client, userdata, msg):
 			print("pub_gps")
 			mqttc.publish(mqtt_sub[0], "GPS")
 	else:
+		print("other")
 		if readChannel(fsr_channel) >= 10:
 			if dht() >= hum_val:
 				print("on")
