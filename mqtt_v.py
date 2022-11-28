@@ -173,7 +173,7 @@ def on_publish(client, userdata, mid):
 	
 def on_message(client, userdata, msg):
 	print("Topic:", msg.topic, " Message:", str(msg.payload))
-	if msg.topic == "PIR" and str(msg.payload) == b'detected':
+	if msg.topic == "PIR" and str(msg.payload) == "b'detected'":
 		print("PIR detected msg get")
 		if readChannel(fsr_channel) >= 10:
 			print("pub_gps")
