@@ -5,6 +5,8 @@ import RPi.GPIO as gpio
 import dht11
 import math
 import paho.mqtt.client as mqtt
+import spidev
+
 # import time
 
 r_led = 5
@@ -18,9 +20,25 @@ gpio.setup(y_led, gpio.OUT)
 gpio.setup(g_led, gpio.OUT)
 gpio.cleanup()
 
+gpio.output(r_led, False)
+gpio.output(y_led, False)
+gpio.output(g_led, False)
+
+spi = spidev.SpiDev()
+spi.open(0, 0)
+spi.max_speed_hz = 976000
+
+fsr_channel = 0
+
 instance = dht11.DHT11(pin = 19)
 
+ip_address = "192.168.240.202"
+
 mqttc = mqtt.Client()
+
+mqtt_sub = ["", "", ""]
+
+hum_val = 30
 
 NX = 149            ## X축 격자점 수
 NY = 253            ## Y축 격자점 수
@@ -145,11 +163,57 @@ def getWeather():
 	
 	return retV
 
+def on_connect(client, userdata, flags, rc):
+	print("Connected with result code" + str(rc))
+	for i in mqtt_sub:
+		mqttc.subscribe(i)
 
+def on_publish(client, userdata, mid):
+	msg_id = mid
+	print("message published")
+	
+def on_message(client, userdata, msg):
+	print("Topic:", msg.topic, " Message:", str(msg.payload))
+	if msg.topic == "PIR" and str(msg.payload) == "detected":
+		if True: # 압력센서 값 입력시
+			mqttc.publish(mqtt_sub[0], "GPS")
+	else:
+		if True: # 압력센서 값 입력시
+			if dht() >= hum_val:
+				gpio.output(r_led, True)
+			else:
+				gpio.output(r_led, False)
+				
+def readChannel(channel):
+	adc = spi.xfer2([1, (8 + channel) << 4, 0])
+	return ((adc[1] & 3) << 8) + adc[2]
+
+mqttc.on_connect = on_connect
+mqttc.on_publish = on_publish
+mqttc.on_message = on_message
+
+mqttc.connect(ip_address, 1883, 60)
+
+try:
+	mqttc.loop_forever()
+except KeyboardInterrupt:
+	print("Finished")
+	for i in mqtt_sub: mqttc.unsubscribe(i)
+	mqttc.disconnect()
+
+'''
+while True:
+    fsr_level = readChannel(fsr_channel)
+    prin(fsr_level)
+'''
+	
+'''
 a = getWeather()
 print("time:", a[0])
 for i in range(1, len(a) - 1, 3):
 	print(a[i], a[i+1], a[i+2])
+'''
+	
 # print(a)
 # now_time = a[0]
 # for i in a[1:]:
