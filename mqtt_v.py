@@ -18,7 +18,6 @@ gpio.setmode(gpio.BCM)
 gpio.setup(r_led, gpio.OUT)
 gpio.setup(y_led, gpio.OUT)
 gpio.setup(g_led, gpio.OUT)
-gpio.cleanup()
 
 gpio.output(r_led, False)
 gpio.output(y_led, False)
