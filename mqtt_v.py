@@ -31,7 +31,7 @@ fsr_channel = 0
 
 instance = dht11.DHT11(pin = 19)
 
-ip_address = "192.168.110.18"
+ip_address = "192.168.110.202"
 
 mqttc = mqtt.Client()
 
