@@ -35,7 +35,7 @@ ip_address = "192.168.110.202"
 
 mqttc = mqtt.Client()
 
-mqtt_sub = ["", "", ""]
+mqtt_sub = ["gps", "hum", "PIR"]
 
 hum_val = 30
 
