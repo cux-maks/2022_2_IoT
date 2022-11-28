@@ -4,6 +4,7 @@ from datetime import datetime as d
 import RPi.GPIO as gpio
 import dht11
 import math
+import paho.mqtt.client as mqtt
 # import time
 
 r_led = 5
@@ -19,11 +20,7 @@ gpio.cleanup()
 
 instance = dht11.DHT11(pin = 19)
 
-def dht():
-	result = instance.read()
-	if result.is_valid():
-		return round(result.humidity, 3)
-	else: return None
+mqttc = mqtt.Client()
 
 NX = 149            ## X축 격자점 수
 NY = 253            ## Y축 격자점 수
@@ -56,6 +53,12 @@ if first == 0 :
     ro = math.tan(PI * 0.25 + olat * 0.5)
     ro = re * sf / math.pow(ro, sn)
     first = 1
+
+def dht():
+	result = instance.read()
+	if result.is_valid():
+		return round(result.humidity, 3)
+	else: return None
 
 def mapToGrid(lat, lon, code = 0 ):
     ra = math.tan(PI * 0.25 + lat * DEGRAD * 0.5)
