@@ -1,3 +1,6 @@
+#-*-coding: utf-8-*-
+#-*-coding: euc-kr-*-
+
 import requests
 import re as r
 from datetime import datetime as d
