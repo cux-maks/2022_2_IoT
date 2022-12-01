@@ -225,5 +225,3 @@ for i in range(1, len(a) - 1, 3):
 # 		time = list(x)
 # 		time = ''.join(time[x] for x in range(4))
 # 		if time == now_time: print(x)
-
-#주석 추가추가 예아
