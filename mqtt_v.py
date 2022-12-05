@@ -199,7 +199,7 @@ mqttc.on_connect = on_connect
 mqttc.on_publish = on_publish
 mqttc.on_message = on_message
 
-mqttc.connect(ip_address, 5340, 60)
+mqttc.connect(ip_address, 1883, 60)
 
 try:
 	mqttc.loop_forever()
