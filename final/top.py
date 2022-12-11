@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 
 mqtt_sub = ["gps", "hum", "pir", "btn"]
-ip_address = "102.168.110.202"
+ip_address = "192.168.110.202"
 
 mqttc = mqtt.Client()
 
