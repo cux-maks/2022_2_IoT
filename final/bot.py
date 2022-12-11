@@ -1,21 +1,10 @@
 import paho.mqtt.client as mqtt
 import RPi.GPIO as gpio
 
-pir = 21
-
-gpio.setmode(gpio.BCM)
-gpio.setup(pir, gpio.IN)
-
-mqtt_sub = ["gps", "hum", "btn"]
+mqtt_sub = ["pir"]
 ip_address = "192.168.110.202"
 
 mqttc = mqtt.Client()
-
-def pir_state():
-    if gpio.input(pir) == True:
-        return "detected"
-    else:
-        return "nothing"
 
 def on_connect(client, userdata, flags, rc):
 	print("Connected with result code" + str(rc))
@@ -38,7 +27,6 @@ mqttc.connect(ip_address, 1883, 60)
 
 try:
     while True:
-        mqttc.publish("pir", pir_state())
         mqttc.loop()
 except KeyboardInterrupt:
     mqttc.disconnect()
