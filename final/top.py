@@ -38,7 +38,8 @@ mqttc.connect(ip_address, 1883, 60)
 
 try:
     while True:
-        mqttc.publish("pir", pir_state())
+        pir_result = pir_state()
+        if pir_result == "detected": mqttc.publish("pir", pir_state())
         mqttc.loop()
 except KeyboardInterrupt:
     mqttc.disconnect()
