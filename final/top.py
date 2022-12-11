@@ -4,6 +4,10 @@ import requests
 import re as r
 from datetime import datetime as d
 import math
+import os
+import random
+
+sound_list = ["./rain1.wav", "./rain2.wav", "./rain3.wav", "./rain4.wav"]
 
 msg_topic = str()
 msg_msg = str()
@@ -67,73 +71,73 @@ def mapToGrid(lat, lon, code = 0 ):
 
 def getWeather():
 
-	retV = []
+        retV = []
 
-	find_V = ["POP", "PTY", "SKY"]
-	append_V = [" 강수확률(POP): ", " 강수형태(PTY): ", " 하늘상태(SKY): "]
-	last_V = ["%", "", ""]
+        find_V = ["POP", "PTY", "SKY"]
+        append_V = [" 강수확률(POP): ", " 강수형태(PTY): ", " 하늘상태(SKY): "]
+        last_V = ["%", "", ""]
 
-	my_PTY = {"0":"없음", "1":"비", "2":"비/눈", "3":"눈", "4":"소나기"}
-	my_SKY = {"1" : "맑음", "3" : "구름많음", "4" : "흐림"}
+        my_PTY = {"0":"없음", "1":"비", "2":"비/눈", "3":"눈", "4":"소나기"}
+        my_SKY = {"1" : "맑음", "3" : "구름많음", "4" : "흐림"}
 
-	time = d.now()
-	now_h = str()
-	if (time.hour > 0 and time.hour <= 2) or (time.hour <= 24 and time.hour > 23): now_h = "2300"
-	elif time.hour > 2 and time.hour <= 5: now_h = "0200"
-	elif time.hour > 5 and time.hour <= 8: now_h = "0500"
-	elif time.hour > 8 and time.hour <= 11: now_h = "0800"
-	elif time.hour > 11 and time.hour <= 14: now_h = "1100"
-	elif time.hour > 14 and time.hour <= 17: now_h = "1400"
-	elif time.hour > 17 and time.hour <= 20: now_h = "1700"
-	elif time.hour > 20 and time.hour <= 23: now_h = "2000"
+        time = d.now()
+        now_h = str()
+        if (time.hour > 0 and time.hour <= 2) or (time.hour <= 24 and time.hour > 23): now_h = "2300"
+        elif time.hour > 2 and time.hour <= 5: now_h = "0200"
+        elif time.hour > 5 and time.hour <= 8: now_h = "0500"
+        elif time.hour > 8 and time.hour <= 11: now_h = "0800"
+        elif time.hour > 11 and time.hour <= 14: now_h = "1100"
+        elif time.hour > 14 and time.hour <= 17: now_h = "1400"
+        elif time.hour > 17 and time.hour <= 20: now_h = "1700"
+        elif time.hour > 20 and time.hour <= 23: now_h = "2000"
 
-	realtime = str(time.hour) + "00"
-	retV.append(realtime)
-	
-	now_d = str(time.date())
-	now_d = ''.join([x for x in list(now_d) if x != '-'])
+        realtime = str(time.hour) + "00"
+        retV.append(realtime)
 
-	# print(now_h)
-	#print(now_d)
+        now_d = str(time.date())
+        now_d = ''.join([x for x in list(now_d) if x != '-'])
 
-	x_n = 36.766615
-	y_n = 127.282466
-	
-	nx, ny = mapToGrid(x_n, y_n)
-	
-	url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'
-	params = {'serviceKey' : 'JYVAfDor8zrqtfnqsihAVqSRYDQFh382sboRRIHQOFlvI5Beo/r6/0SWlywHrH3lSnGlJq64vn8LNpYVBGnDFg==', 'numOfRows' : '50', 'pageNo' : '1', 'dataType' : 'XML', 'base_date' : now_d, 'base_time' : now_h, 'nx' : str(nx), 'ny' : str(ny) }
+        # print(now_h)
+        #print(now_d)
 
-	response = requests.get(url, params=params)
-	response_str = response.content.decode('utf-8')
-	#print(response_str)
+        x_n = 36.766615
+        y_n = 127.282466
 
-	cnt = 0
+        nx, ny = mapToGrid(x_n, y_n)
 
-	# 강수 확률 추출
-	#print("강수 확률")
-	for x in list(response_str.split('<items>')):
-		if cnt >= 1: 
-			
-			for yp in x.split("</item>"):
-				# print(y)
-				for i in range(3):
-					buf = []
-					if len(r.findall(find_V[i], yp)) != 0:
-						findall_result = r.findall(r'<fcstValue>[0-9]{2}</fcstValue>', yp) + r.findall(r'<fcstValue>[0-9]{3}</fcstValue>', yp) + r.findall(r'<fcstValue>[0-9]{1}</fcstValue>', yp)
-						findall_time = r.sub(r'[^0-9]', '', (r.findall(r'<fcstTime>[0-9]{4}</fcstTime>', yp))[0])
-						result_num = r.sub(r'[^0-9]', '', findall_result[0])
-						# print("time: ", findall_time)
-						#print(findall_time, "강수확률(POP):", result_num, "%")
-						#if str(findall_time) == realtime: buf.append(str(findall_time) + " 강수확률(POP): " + str(result_num) + "%")
-						if find_V[i] == "PTY": val = my_PTY[result_num]
-						elif find_V[i] == "SKY": val = my_SKY[result_num]
-						else: val = str(result_num)
-						buf.append(str(findall_time) + append_V[i] + val + last_V[i])
-						retV.append(buf)
-		cnt += 1
-	
-	return retV
+        url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'
+        params = {'serviceKey' : 'JYVAfDor8zrqtfnqsihAVqSRYDQFh382sboRRIHQOFlvI5Beo/r6/0SWlywHrH3lSnGlJq64vn8LNpYVBGnDFg==', 'numOfRows' : '50', 'pageNo' : '1', 'dataType' : 'XML', 'base_date' : now_d, 'base_time' : now_h, 'nx' : str(nx), 'ny' : str(ny) }
+
+        response = requests.get(url, params=params)
+        response_str = response.content.decode('utf-8')
+        #print(response_str)
+
+        cnt = 0
+
+        # 강수 확률 추출
+        #print("강수 확률")
+        for x in list(response_str.split('<items>')):
+                if cnt >= 1:
+
+                        for yp in x.split("</item>"):
+                                # print(y)
+                                for i in range(3):
+                                        buf = []
+                                        if len(r.findall(find_V[i], yp)) != 0:
+                                                findall_result = r.findall(r'<fcstValue>[0-9]{2}</fcstValue>', yp) + r.findall(r'<fcstValue>[0-9]{3}</fcstValue>', yp) + r.findall(r'<fcstValue>[0-9]{1}</fcstValue>', yp)
+                                                findall_time = r.sub(r'[^0-9]', '', (r.findall(r'<fcstTime>[0-9]{4}</fcstTime>', yp))[0])
+                                                result_num = r.sub(r'[^0-9]', '', findall_result[0])
+                                                # print("time: ", findall_time)
+                                                #print(findall_time, "강수확률(POP):", result_num, "%")
+                                                #if str(findall_time) == realtime: buf.append(str(findall_time) + " 강수확률(POP): " + str(result_num) + "%")
+                                                if find_V[i] == "PTY": val = my_PTY[result_num]
+                                                elif find_V[i] == "SKY": val = my_SKY[result_num]
+                                                else: val = str(result_num)
+                                                buf.append((val, str(findall_time) + append_V[i] + val + last_V[i]))
+                                                retV.append(buf)
+                cnt += 1
+
+        return retV
 
 def pir_state():
     if gpio.input(pir) == True:
@@ -143,19 +147,29 @@ def pir_state():
 
 def on_connect(client, userdata, flags, rc):
         print("Connected with result code" + str(rc))
-        for i in mqtt_sub:
-                mqttc.subscribe(i)
+        mqttc.subscribe("distance")
+        # for i in mqtt_sub:
+               # mqttc.subscribe(i)
 
 def on_publish(client, userdata, mid):
         msg_id = mid
         # print("message published")
 
 def on_message(client, userdata, msg):
-        if msg.topic in mqtt_sub:
-                print("Topic:", msg.topic, " Message:", str(msg.payload))
-                msg_topic = msg.topic
-                msg_msg = msg.payload
-                
+        #if msg.topic in mqtt_sub:
+        global msg_topic
+        global msg_msg
+        msg_topic = msg.topic
+        msg_msg = list(str(msg.payload))
+        msg_msg = [x for x in msg_msg if x.isdigit() or x == "."]
+        msg_msg = ''.join(x for x in list(msg_msg))
+        msg_msg = float(msg_msg)
+        # msg_msg = int.from_bytes(msg_msg, byteorder='little')
+        print("Topic:", msg_topic, " Message:", msg_msg)
+#        msg_topic = msg.topic
+ #       msg_msg = msg.payload
+  #      int.from_bytes(msg_msg, byteorder='little')
+
 
 mqttc.on_connect = on_connect
 mqttc.on_publish = on_publish
@@ -165,9 +179,22 @@ mqttc.connect(ip_address, 1883, 60)
 
 try:
     while True:
-        if msg_topic == "distance" and msg_msg == "10":
-            print("yes")
-        
+        max_val = 0
+        mqttc.loop()
+        if msg_topic == "distance" and msg_msg <= 5.0:
+                if pir_state() == "detected":
+                        result = getWeather()
+                        for i in result:
+                                if i[0][0].isdigit():
+                                        max_val = max(max_val, int(i[0][0]))
+                        if max_val >= 0:
+                                os.system("aplay " + sound_list[random.randrange(0, 3)])
+                        print("yes")
+                        msg_topic = None
+                        msg_msg = None
+        else:
+                print("no")
+
 
 except KeyboardInterrupt:
     mqttc.disconnect()

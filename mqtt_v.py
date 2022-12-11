@@ -4,43 +4,9 @@
 import requests
 import re as r
 from datetime import datetime as d
-import RPi.GPIO as gpio
-import dht11
 import math
-import paho.mqtt.client as mqtt
-import spidev
 
 # import time
-
-r_led = 5
-y_led = 6
-g_led =13
-
-gpio.setwarnings(False)
-gpio.setmode(gpio.BCM)
-gpio.setup(r_led, gpio.OUT)
-gpio.setup(y_led, gpio.OUT)
-gpio.setup(g_led, gpio.OUT)
-
-gpio.output(r_led, False)
-gpio.output(y_led, False)
-gpio.output(g_led, False)
-
-spi = spidev.SpiDev()
-spi.open(0, 0)
-spi.max_speed_hz = 976000
-
-fsr_channel = 0
-
-instance = dht11.DHT11(pin = 19)
-
-ip_address = "192.168.110.202"
-
-mqttc = mqtt.Client()
-
-mqtt_sub = ["gps", "hum", "PIR"]
-
-hum_val = 30
 
 NX = 149            # X축 격자점 수
 NY = 253            # Y축 격자점 수
@@ -73,12 +39,6 @@ if first == 0 :
     ro = math.tan(PI * 0.25 + olat * 0.5)
     ro = re * sf / math.pow(ro, sn)
     first = 1
-
-def dht():
-	result = instance.read()
-	if result.is_valid():
-		return round(result.humidity, 3)
-	else: return None
 
 def mapToGrid(lat, lon, code = 0 ):
     ra = math.tan(PI * 0.25 + lat * DEGRAD * 0.5)
@@ -133,6 +93,7 @@ def getWeather():
 	
 	url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'
 	params = {'serviceKey' : 'JYVAfDor8zrqtfnqsihAVqSRYDQFh382sboRRIHQOFlvI5Beo/r6/0SWlywHrH3lSnGlJq64vn8LNpYVBGnDFg==', 'numOfRows' : '50', 'pageNo' : '1', 'dataType' : 'XML', 'base_date' : now_d, 'base_time' : now_h, 'nx' : str(nx), 'ny' : str(ny) }
+	print(now_d, now_h)
 
 	response = requests.get(url, params=params)
 	response_str = response.content.decode('utf-8')
@@ -159,54 +120,18 @@ def getWeather():
 						if find_V[i] == "PTY": val = my_PTY[result_num]
 						elif find_V[i] == "SKY": val = my_SKY[result_num]
 						else: val = str(result_num)
-						buf.append(str(findall_time) + append_V[i] + val + last_V[i])
+						buf.append((val, str(findall_time) + append_V[i] + val + last_V[i]))
 						retV.append(buf)
 		cnt += 1
 	
 	return retV
 
-def on_connect(client, userdata, flags, rc):
-	print("Connected with result code" + str(rc))
-	for i in mqtt_sub:
-		mqttc.subscribe(i)
-
-def on_publish(client, userdata, mid):
-	msg_id = mid
-	print("message published")
-	
-def on_message(client, userdata, msg):
-	print("Topic:", msg.topic, " Message:", str(msg.payload))
-	if msg.topic == "PIR" and str(msg.payload) == "b'detected'":
-		print("PIR detected msg get")
-		if readChannel(fsr_channel) >= 10:
-			print("pub_gps")
-			mqttc.publish(mqtt_sub[0], "GPS")
-	else:
-		print("other")
-		if readChannel(fsr_channel) >= 10:
-			if dht() >= hum_val:
-				print("on")
-				gpio.output(r_led, True)
-			else:
-				print("off")
-				gpio.output(r_led, False)
-				
-def readChannel(channel):
-	adc = spi.xfer2([1, (8 + channel) << 4, 0])
-	return ((adc[1] & 3) << 8) + adc[2]
-
-mqttc.on_connect = on_connect
-mqttc.on_publish = on_publish
-mqttc.on_message = on_message
-
-mqttc.connect(ip_address, 1883, 60)
-
-try:
-	mqttc.loop_forever()
-except KeyboardInterrupt:
-	print("Finished")
-	for i in mqtt_sub: mqttc.unsubscribe(i)
-	mqttc.disconnect()
+max_val = 0
+result = getWeather()
+for i in result:
+	if i[0][0].isdigit():
+		max_val = max(max_val, int(i[0][0]))
+print(max_val)
 
 '''
 while True:
