@@ -3,7 +3,7 @@ from bluetooth import *
 server_socket= BluetoothSocket(RFCOMM)
 
 port = 1
-server_socket.bind(("", port))
+server_socket.bind(("78:46:D4:F7:07:DE", port))
 server_socket.listen(1)
 
 client_socket, address = server_socket.accept()
